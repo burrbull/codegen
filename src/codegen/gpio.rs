@@ -70,12 +70,17 @@ pub fn gen_mappings(gpio_ips: &[gpio::Ip]) -> Result<()> {
         println!("{m}");
     }*/
 
+    let mut series: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
+
     let mut results = String::new();
     for (per, x) in &map {
         let mut all_features = BTreeSet::<String>::new();
         for (_, xx) in x {
             for (_, fs) in xx {
                 all_features.extend(fs.iter().cloned());
+                for s in fs {
+                    series.entry(s.into()).or_default().insert(per.into());
+                }
             }
         }
         results.push_str(&print_features(
@@ -182,6 +187,11 @@ pub fn gen_mappings(gpio_ips: &[gpio::Ip]) -> Result<()> {
             ));
             for (pin, features) in xx {
                 let mut diff = all_features.difference(&features);
+                if !(pin.0 == 'I' && pin.1 == 8) {
+                    for f in features {
+                        series.entry(f.into()).or_default().insert(format!("gpio{}", pin.0.to_lowercase()));
+                    }
+                }
                 let features = if diff.next().is_some() {
                     all_features.intersection(&features).collect::<Vec<_>>()
                 } else {
@@ -371,6 +381,15 @@ pub fn gen_mappings(gpio_ips: &[gpio::Ip]) -> Result<()> {
 
 
         results.push_str("}\n\n");
+    }
+    //println!("{results}");
+    let mut results = String::new();
+    for (s, pers) in series {
+        results.push_str(&format!("{s} = [\n    "));
+        for p in pers {
+            results.push_str(&format!("\"{p}\", "));
+        }
+        results.push_str("\n]\n");
     }
     println!("{results}");
     Ok(())
@@ -565,7 +584,7 @@ fn gen_pin(
     feature: &str,
     map: &mut XMap,
     port_upper: char,
-    port_lower: char,
+    _port_lower: char,
     pin: &gpio::Pin,
 ) -> Result<Vec<String>> {
     let nr = pin.number()?;
@@ -587,7 +606,7 @@ fn gen_pin(
                 .or_default()
                 .insert(feature.into());
         } else {
-            println!("Skipped: {port_lower} {nr} - Unsupported func {func}");
+        //    println!("Skipped: {port_lower} {nr} - Unsupported func {func}");
         }
     }
     Ok(strings)
