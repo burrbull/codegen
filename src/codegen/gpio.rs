@@ -189,7 +189,10 @@ pub fn gen_mappings(gpio_ips: &[gpio::Ip]) -> Result<()> {
                 let mut diff = all_features.difference(&features);
                 if !(pin.0 == 'I' && pin.1 == 8) {
                     for f in features {
-                        series.entry(f.into()).or_default().insert(format!("gpio{}", pin.0.to_lowercase()));
+                        series
+                            .entry(f.into())
+                            .or_default()
+                            .insert(format!("gpio{}", pin.0.to_lowercase()));
                     }
                 }
                 let features = if diff.next().is_some() {
@@ -283,7 +286,10 @@ pub fn gen_mappings(gpio_ips: &[gpio::Ip]) -> Result<()> {
         }
 
         if per.starts_with("sai") {
-            results.push_str(&format!("    use crate::pac::{} as SAI;\n", per.to_uppercase()));
+            results.push_str(&format!(
+                "    use crate::pac::{} as SAI;\n",
+                per.to_uppercase()
+            ));
             results.push_str(
                 r##"    pub struct ChannelA;
     pub struct ChannelB;
@@ -328,7 +334,10 @@ pub fn gen_mappings(gpio_ips: &[gpio::Ip]) -> Result<()> {
         }
 
         if per.starts_with("usart") {
-            results.push_str(&format!("    use crate::pac::{} as USART;\n", per.to_uppercase()));
+            results.push_str(&format!(
+                "    use crate::pac::{} as USART;\n",
+                per.to_uppercase()
+            ));
             results.push_str(
                 r##"    impl SerialAsync for USART {
         type Rx<Otype> = Rx<Otype>;
@@ -341,7 +350,8 @@ pub fn gen_mappings(gpio_ips: &[gpio::Ip]) -> Result<()> {
                     r#"impl SerialSync for USART {
             type Ck = Ck;
         }
-    "#,);
+    "#,
+                );
             }
             if x.contains_key("Cts") {
                 results.push_str(
@@ -349,12 +359,16 @@ pub fn gen_mappings(gpio_ips: &[gpio::Ip]) -> Result<()> {
             type Cts = Cts;
             type Rts = Rts;
         }
-    "#,);
+    "#,
+                );
             }
         }
 
         if per.starts_with("uart") {
-            results.push_str(&format!("    use crate::pac::{} as UART;\n", per.to_uppercase()));
+            results.push_str(&format!(
+                "    use crate::pac::{} as UART;\n",
+                per.to_uppercase()
+            ));
             results.push_str(
                 r##"    impl SerialAsync for UART {
         type Rx<Otype> = Rx<Otype>;
@@ -367,7 +381,8 @@ pub fn gen_mappings(gpio_ips: &[gpio::Ip]) -> Result<()> {
                     r#"impl SerialSync for UART {
             type Ck = Ck;
         }
-    "#,);
+    "#,
+                );
             }
             if x.contains_key("Cts") {
                 results.push_str(
@@ -375,10 +390,10 @@ pub fn gen_mappings(gpio_ips: &[gpio::Ip]) -> Result<()> {
             type Cts = Cts;
             type Rts = Rts;
         }
-    "#,);
+    "#,
+                );
             }
         }
-
 
         results.push_str("}\n\n");
     }
@@ -606,7 +621,7 @@ fn gen_pin(
                 .or_default()
                 .insert(feature.into());
         } else {
-        //    println!("Skipped: {port_lower} {nr} - Unsupported func {func}");
+            //    println!("Skipped: {port_lower} {nr} - Unsupported func {func}");
         }
     }
     Ok(strings)

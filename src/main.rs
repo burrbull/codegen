@@ -16,11 +16,19 @@ enum Command {
 
         fname: String,
     },
+    #[structopt(about = "Generate DMA tables")]
+    Dma {
+        #[structopt(parse(from_os_str), help = "Path of the STM32CubeMX MCU database")]
+        db_path: PathBuf,
+
+        fname: String,
+    },
 }
 
 fn main() -> Result<()> {
     match Command::from_args() {
         Command::Gpio { db_path, fname } => handle_gpio(db_path, &fname),
+        Command::Dma { db_path, fname } => handle_dma(db_path, &fname),
     }
 }
 
@@ -32,6 +40,19 @@ fn handle_gpio(db_path: PathBuf, fname: &str) -> Result<()> {
     let gpio_ips = cubemx::load_f3_gpio_ips(&db, fname)?;
     codegen::gpio::gen_mappings(&gpio_ips)?;
 
+    Ok(())
+}
+
+fn handle_dma(db_path: PathBuf, fname: &str) -> Result<()> {
+    let db = cubemx::Db::new(db_path);
+
+    emit_autogen_comment(&db)?;
+
+    let dma_ips = cubemx::load_f3_dma_ips(&db, fname)?;
+    for ip in &dma_ips {
+        let map = crate::codegen::dma::ip_to_table(ip)?;
+        dbg!(&map);
+    }
     Ok(())
 }
 
