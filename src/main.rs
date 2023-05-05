@@ -48,11 +48,8 @@ fn handle_dma(db_path: PathBuf, fname: &str) -> Result<()> {
 
     emit_autogen_comment(&db)?;
 
-    let dma_ips = cubemx::load_f3_dma_ips(&db, fname)?;
-    for ip in &dma_ips {
-        let map = crate::codegen::dma::ip_to_table(ip)?;
-        dbg!(&map);
-    }
+    let dma_maps: Result<_> = cubemx::load_f3_dma_ips(&db, fname)?.iter().map(crate::codegen::dma::ip_to_table).collect();
+    crate::codegen::dma::print_table(&dma_maps?);
     Ok(())
 }
 
