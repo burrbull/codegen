@@ -16,7 +16,7 @@ enum Command {
 
         fname: String,
     },
-    #[structopt(about = "Generate DMA tables")]
+    #[structopt(about = "Generate F4-like DMA tables")]
     Dma {
         #[structopt(parse(from_os_str), help = "Path of the STM32CubeMX MCU database")]
         db_path: PathBuf,
@@ -48,7 +48,10 @@ fn handle_dma(db_path: PathBuf, fname: &str) -> Result<()> {
 
     emit_autogen_comment(&db)?;
 
-    let dma_maps: Result<_> = cubemx::load_f3_dma_ips(&db, fname)?.iter().map(crate::codegen::dma::ip_to_table).collect();
+    let dma_maps: Result<_> = cubemx::load_f3_dma_ips(&db, fname)?
+        .iter()
+        .map(crate::codegen::dma::ip_to_table)
+        .collect();
     crate::codegen::dma::print_table(&dma_maps?);
     Ok(())
 }
