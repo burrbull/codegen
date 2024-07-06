@@ -11,7 +11,12 @@ pub fn print_table(maps: &BTreeMap<String, Map>) {
         for (dma, x) in map {
             for ((c, s), xx) in x {
                 for (modename, mode) in xx {
-                    let dirs = mode.direction.iter().map(ToString::to_string).collect::<Vec<_>>().join(" | ");
+                    let dirs = mode
+                        .direction
+                        .iter()
+                        .map(ToString::to_string)
+                        .collect::<Vec<_>>()
+                        .join(" | ");
                     //let bb = mode.mode.join(" | ");
                     match (s, c) {
                         (SC::Stream(s), CR::Channel(c)) => {
@@ -121,7 +126,9 @@ pub fn ip_to_table(ip: &dma::Ip) -> Result<(String, Map)> {
                             if mode_name == "MEMTOMEM" {
                                 continue;
                             }
-                            let m = modemap.get(mode_name).expect("Missing entry for {mode_name}");
+                            let m = modemap
+                                .get(mode_name)
+                                .expect("Missing entry for {mode_name}");
                             map.entry(dma_name.clone())
                                 .or_default()
                                 .entry((m.cr, stream_id))
@@ -160,7 +167,7 @@ pub enum SC {
 pub enum Direction {
     PtM,
     MtP,
-    MtM
+    MtM,
 }
 
 impl FromStr for Direction {

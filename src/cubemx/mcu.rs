@@ -17,6 +17,7 @@ pub struct Mcu {
 #[derive(Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd)]
 #[serde(rename_all = "PascalCase")]
 pub struct Ip {
+    pub instance_name: String,
     pub name: String,
     pub version: String,
 }

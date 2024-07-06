@@ -397,7 +397,7 @@ pub fn gen_mappings(gpio_ips: &[gpio::Ip]) -> Result<()> {
 
         results.push_str("}\n\n");
     }
-    //println!("{results}");
+    println!("{results}");
     let mut results = String::new();
     for (s, pers) in series {
         results.push_str(&format!("{s} = [\n    "));

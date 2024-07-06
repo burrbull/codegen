@@ -1,7 +1,7 @@
 use crate::cubemx::Db;
 use anyhow::Result;
 use serde::Deserialize;
-use std::{path::PathBuf, fmt::Display, str::FromStr};
+use std::{fmt::Display, path::PathBuf, str::FromStr};
 
 pub fn load(db: &Db, version: &str) -> Result<Ip> {
     let name = format!("DMA-{}_Modes", version);
@@ -58,7 +58,7 @@ pub struct Mode {
 pub enum Logic {
     Or,
     And,
-    Xor
+    Xor,
 }
 
 impl FromStr for Logic {
