@@ -13,6 +13,8 @@ serde-xml-rs = "0.4"
 convert_case = "0.6.0"
 text_io = "0.1.12"
 lazy-regex = "2.5.0"
+spreadsheet-ods = "0.22"
+icu_locid = "*"
 
 [dependencies.structopt]
 version = "0.3"

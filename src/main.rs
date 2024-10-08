@@ -46,7 +46,7 @@ fn handle_gpio(db_path: PathBuf, fname: &str) -> Result<()> {
     emit_autogen_comment(&db)?;
 
     let gpio_ips = cubemx::load_f3_gpio_ips(&db, fname)?;
-    codegen::gpio::gen_mappings(&gpio_ips)?;
+    codegen::gpio::gen_mappings_f1(&gpio_ips)?;
 
     Ok(())
 }
@@ -76,7 +76,30 @@ fn handle_coverage(db_path: PathBuf, pattern: &str) -> Result<()> {
         .collect::<Vec<_>>();
     let mut map = BTreeSet::new();
     for mcu in mcus {
-        map.extend(mcu.ips.into_iter().map(|ip| ip.instance_name));
+        map.extend(
+            mcu.ips
+                .into_iter()
+                .map(|ip| ip.instance_name)
+                .filter(|per| {
+                    ![
+                        "CORTEX_M4",
+                        "CORTEX_M7",
+                        "FATFS",
+                        "FATFS_M4",
+                        "FATFS_M7",
+                        "FREERTOS",
+                        "FREERTOS_M4",
+                        "FREERTOS_M7",
+                        "LIBJPEG",
+                        "MBEDTLS",
+                        "PDM2PCM",
+                        "PDM2PCM_M4",
+                        "PDM2PCM_M7",
+                        "RESMGR_UTILITY",
+                    ]
+                    .contains(&per.as_str())
+                }),
+        );
     }
     for ipname in map {
         println!("\t{ipname}");

@@ -29,6 +29,56 @@ enum Otype {
     Default(&'static str),
 }
 
+#[derive(Clone, Default, Debug)]
+pub struct Table<T> {
+    cols: BTreeSet<String>,
+    rows: BTreeSet<String>,
+    cells: HashMap<(String, String), T>,
+}
+
+pub fn gen_mappings_f1(gpio_ips: &[gpio::Ip]) -> Result<()> {
+    use icu_locid::locale;
+    use spreadsheet_ods::{Sheet, Value, WorkBook};
+    let path = std::path::Path::new("stm32f1.ods");
+    let mut wb = WorkBook::new(locale!("en_US"));
+    for ip in gpio_ips.iter() {
+        let mut sheet = Sheet::new(&ip.version);
+        let mut table = Table::<String>::default();
+        println!("{}", ip.version);
+        for pin in ip.pins.iter() {
+            for s in &pin.pin_signals {
+                table.rows.insert(pin.name.clone());
+                table.cols.insert(s.name.clone());
+                table.cells.insert((pin.name.clone(), s.name.clone()), {
+                    if s.remaps.is_empty() {
+                        "ZZZZZZZ".to_string()
+                    } else {
+                        s.remaps.iter().map(|r| r.name.as_str()).collect::<Vec<_>>().join("\n")
+                    }
+                });
+            }
+        }
+        for (i, p) in table.rows.iter().enumerate() {
+            sheet.set_value((i as u32) + 1, 0, p);
+        }
+        for (j, s) in table.cols.iter().enumerate() {
+            sheet.set_value(0, (j as u32) + 1, s);
+        }
+        for (i, p) in table.rows.iter().enumerate() {
+            for (j, s) in table.cols.iter().enumerate() {
+                let key = (p.to_string(), s.to_string());
+                if table.cells.contains_key(&key) {
+                    sheet.set_value((i as u32) + 1, (j as u32) + 1, table.cells.get(&key));
+                }
+            }
+        }
+        wb.push_sheet(sheet);
+    }
+    spreadsheet_ods::write_ods(&mut wb, path).expect("write_ods");
+
+    Ok(())
+}
+
 pub fn gen_mappings(gpio_ips: &[gpio::Ip]) -> Result<()> {
     let mut all_macros = Vec::<PortMacro>::new();
     let mut map = BTreeMap::new();

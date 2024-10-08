@@ -59,20 +59,31 @@ impl Pin {
 #[serde(rename_all = "PascalCase")]
 pub struct PinSignal {
     pub name: String,
-    specific_parameter: SpecificParameter,
+    specific_parameter: Option<SpecificParameter>,
+    #[serde(rename = "RemapBlock", default)]
+    pub remaps: Vec<RemapBlock>,
 }
 
 impl PinSignal {
     pub fn af(&self) -> Result<(u8, String)> {
-        let param = &self.specific_parameter;
-        if
-        /*self.name.starts_with("TIM") && */
-        param.name == "GPIO_AF" {
-            Ok((parse_af(&param.possible_value)?, self.name.clone()))
-        } else {
-            bail!("PinSignal is missing a GPIO_AF parameter")
+        match &self.specific_parameter {
+            Some(param) if
+            /*self.name.starts_with("TIM") && */
+            param.name == "GPIO_AF" => {
+                Ok((parse_af(&param.possible_value)?, self.name.clone()))
+            }
+                _ => bail!("PinSignal is missing a GPIO_AF parameter"),
         }
     }
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct RemapBlock {
+    pub name: String,
+    #[serde(default)]
+    default_remap: bool,
+    specific_parameter: Option<SpecificParameter>,
 }
 
 fn parse_af(s: &str) -> Result<u8> {
