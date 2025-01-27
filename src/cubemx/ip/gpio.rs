@@ -63,12 +63,10 @@ pub struct PinSignal {
 }
 
 impl PinSignal {
-    pub fn af(&self) -> Result<(u8, String)> {
+    pub fn af(&self) -> Result<u8> {
         let param = &self.specific_parameter;
-        if
-        /*self.name.starts_with("TIM") && */
-        param.name == "GPIO_AF" {
-            Ok((parse_af(&param.possible_value)?, self.name.clone()))
+        if param.name == "GPIO_AF" {
+            parse_af(&param.possible_value)
         } else {
             bail!("PinSignal is missing a GPIO_AF parameter")
         }

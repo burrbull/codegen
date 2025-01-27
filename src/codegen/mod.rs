@@ -1,4 +1,3 @@
-pub mod dma;
 pub mod gpio;
 
 use crate::cubemx::package::Package;

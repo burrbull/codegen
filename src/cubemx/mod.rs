@@ -38,10 +38,3 @@ pub fn load_f3_gpio_ips(db: &Db, fname: &str) -> Result<Vec<ip::gpio::Ip>> {
         .map(|ip_| ip::gpio::load(db, &ip_.version))
         .collect()
 }
-
-pub fn load_f3_dma_ips(db: &Db, fname: &str) -> Result<Vec<ip::dma::Ip>> {
-    load_f3_ips(db, "DMA", fname)?
-        .into_iter()
-        .map(|ip_| ip::dma::load(db, &ip_.version))
-        .collect()
-}
