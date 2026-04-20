@@ -10,10 +10,12 @@ struct Port<'a> {
 }
 
 pub fn gen_mappings(gpio_ips: &[gpio::Ip]) -> Result<()> {
+    println!();
+    println!("cfg_select! {{");
     for ip in gpio_ips.iter() {
-        println!();
         gen_gpio_ip(ip)?;
     }
+    println!("}}");
     Ok(())
 }
 
@@ -21,7 +23,9 @@ fn gen_gpio_ip(ip: &gpio::Ip) -> Result<()> {
     let feature = ip_version_to_feature(&ip.version)?;
     let ports = merge_pins_by_port(&ip.pins)?;
 
-    gen_gpio_macro_call(&ports, &feature)?;
+    println!(r#"    feature = "{feature}" => {{"#);
+    gen_gpio_macro_call(&ports)?;
+    println!("    }}");
     Ok(())
 }
 
@@ -61,9 +65,8 @@ fn merge_pins_by_port(pins: &[gpio::Pin]) -> Result<Vec<Port>> {
     Ok(ports)
 }
 
-fn gen_gpio_macro_call(ports: &[Port], feature: &str) -> Result<()> {
+fn gen_gpio_macro_call(ports: &[Port]) -> Result<()> {
     for port in ports {
-        println!(r#"#[cfg(feature = "{}")]"#, feature);
         gen_port(port)?;
         println!();
     }
@@ -75,7 +78,7 @@ fn gen_port(port: &Port) -> Result<()> {
     let port_upper = port.id;
     let port_lower = port.id.to_ascii_lowercase();
     println!(
-        "gpio!(GPIO{0}, gpio{1}, P{0}, '{0}', P{0}n, [",
+        "        gpio!(GPIO{0}, gpio{1}, P{0}, '{0}', P{0}n, [",
         port_upper, port_lower
     );
 
@@ -83,7 +86,7 @@ fn gen_port(port: &Port) -> Result<()> {
         gen_pin(port_upper, port_lower, pin)?;
     }
 
-    println!("]);");
+    println!("        ]);");
     Ok(())
 }
 
@@ -93,7 +96,7 @@ fn gen_pin(port_upper: char, port_lower: char, pin: &gpio::Pin) -> Result<()> {
     let af_numbers = get_pin_af_numbers(pin)?;
 
     println!(
-        "    P{0}{2}: (p{1}{2}, {2}, {3:?}{4}),",
+        "            P{0}{2}: (p{1}{2}, {2}, {3:?}{4}),",
         port_upper,
         port_lower,
         nr,
